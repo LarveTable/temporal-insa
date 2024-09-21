@@ -19,6 +19,9 @@ from sklearn.linear_model import RidgeClassifierCV
 
 from rocket_functions import generate_kernels, apply_kernels
 
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+
 # == notes =====================================================================
 
 # Reproduce the experiments on the UCR archive.
@@ -62,7 +65,7 @@ results = pd.DataFrame(index = dataset_names,
                                   "accuracy_standard_deviation",
                                   "time_training_seconds",
                                   "time_test_seconds"],
-                       data = 0)
+                       data = 0.0) #Modified data type to float because of warning
 results.index.name = "dataset"
 
 print(f"RUNNING".center(80, "="))
@@ -75,11 +78,13 @@ for dataset_name in dataset_names:
 
     print(f"Loading data".ljust(80 - 5, "."), end = "", flush = True)
 
-    training_data = np.loadtxt(f"{arguments.input_path}/{dataset_name}/{dataset_name}_TRAIN.txt")
-    Y_training, X_training = training_data[:, 0].astype(np.int32), training_data[:, 1:]
+    training_data = np.loadtxt(f"{arguments.input_path}/{dataset_name}/{dataset_name}_TRAIN.tsv")
+    cleaned_data = np.nan_to_num(training_data[:, 1:], nan=0.0) #Cleaned data from NaN values to 0.0
+    Y_training, X_training = training_data[:, 0].astype(np.int32), cleaned_data
 
-    test_data = np.loadtxt(f"{arguments.input_path}/{dataset_name}/{dataset_name}_TEST.txt")
-    Y_test, X_test = test_data[:, 0].astype(np.int32), test_data[:, 1:]
+    test_data = np.loadtxt(f"{arguments.input_path}/{dataset_name}/{dataset_name}_TEST.tsv")
+    cleaned_data = np.nan_to_num(test_data[:, 1:], nan=0.0) #Cleaned data from NaN values to 0.0
+    Y_test, X_test = test_data[:, 0].astype(np.int32), cleaned_data
 
     print("Done.")
 
@@ -112,15 +117,19 @@ for dataset_name in dataset_names:
         # -- training ----------------------------------------------------------
 
         time_a = time.perf_counter()
-        classifier = RidgeClassifierCV(alphas = np.logspace(-3, 3, 10), normalize = True)
-        classifier.fit(X_training_transform, Y_training)
+        #classifier = RidgeClassifierCV(alphas = np.logspace(-3, 3, 10)) #REMOVED NORMALIZE
+
+        model = make_pipeline(
+        StandardScaler(with_mean=False), RidgeClassifierCV(alphas = np.logspace(-3, 3, 10))) #ADDED NORMALIZE WITH THE NEW SCIKIT-LEARN VERSION
+        model.fit(X_training_transform, Y_training)
+
         time_b = time.perf_counter()
         _timings[2, i] = time_b - time_a
 
         # -- test --------------------------------------------------------------
 
         time_a = time.perf_counter()
-        _results[i] = classifier.score(X_test_transform, Y_test)
+        _results[i] = model.score(X_test_transform, Y_test)
         time_b = time.perf_counter()
         _timings[3, i] = time_b - time_a
 

@@ -1,0 +1,14 @@
+ACSF1
+Adiac
+AllGestureWiimoteX
+AllGestureWiimoteY
+AllGestureWiimoteZ
+ArrowHead
+BME
+Beef
+BeetleFly
+BirdChicken
+CBF
+Car
+Chinatown
+ChlorineConcentration
