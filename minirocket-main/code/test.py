@@ -3,6 +3,7 @@ from minirocket import transform
 from sklearn.linear_model import RidgeClassifierCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
+import time
 
 # load data from UCR archive
 
@@ -24,16 +25,32 @@ print("Done.")
 # * input time series do *not* need to be normalised
 # * input data should be np.float32
 
+time_a_trans = time.perf_counter()
 parameters, X_training_transform = fit_transform(X_training)
+time_b_trans = time.perf_counter()
+time_trans = time_b_trans - time_a_trans
 
+time_a_trans = time.perf_counter()
+X_test_transform = transform(X_test, parameters)
+time_b_trans = time.perf_counter()
+time_trans_test = time_b_trans - time_a_trans
+
+time_a = time.perf_counter()
 model = make_pipeline(
     StandardScaler(with_mean=False), RidgeClassifierCV(alphas = np.logspace(-3, 3, 10)))
 model.fit(X_training_transform, Y_training)
+time_b = time.perf_counter()
+time_training = time_b - time_a
 
-model.fit(X_training_transform, Y_training)
+#predictions = model.predict(X_test_transform)
 
-X_test_transform = transform(X_test, parameters)
+time_a = time.perf_counter()
+score = model.score(X_test_transform, Y_test)
+time_b = time.perf_counter()
+time_testing = time_b - time_a
 
-predictions = model.predict(X_test_transform)
-
-print(model.score(X_test_transform, Y_test))
+print("transform training data :" + str(time_trans) + ",\n" + 
+      "transform test data :" + str(time_trans_test) + ",\n" + 
+      "training :" + str(time_training) + ",\n" + 
+      "testing :" + str(time_testing) + ",\n" + 
+      "score :" + str(score))
