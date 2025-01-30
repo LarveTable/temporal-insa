@@ -44,8 +44,8 @@ score = ls.score(X_test, Y_test)
 time_b = time.perf_counter()
 time_testing = time_b - time_a
 
-print("transform training data : X,\n" + 
-      "transform test data : X,\n" + 
+print("transform training data :" + str(time_trans) + ",\n" + 
+      "transform test data :" + str(time_trans_test) + ",\n" + 
       "training :" + str(time_training) + ",\n" + 
       "testing :" + str(time_testing) + ",\n" + 
       "score :" + str(score))
