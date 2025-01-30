@@ -53,7 +53,7 @@ print("transform training data :" + str(time_trans) + ",\n" +
 
 # Visualize
 # Visualize the transformation for the first time series
-plt.figure(figsize=(6, 4))
+"""plt.figure(figsize=(6, 4))
 vocabulary_length = len(boss.vocabulary_)
 width = 0.3
 plt.bar(np.arange(vocabulary_length) - width / 2, X_training_transform[Y_training == 1][0],
@@ -71,4 +71,4 @@ plt.ylabel("Frequencies", fontsize=14)
 plt.title("BOSS transformation", fontsize=16)
 plt.legend(loc='best', fontsize=10)
 plt.tight_layout()
-plt.show()
+plt.show()"""
