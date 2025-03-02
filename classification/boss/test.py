@@ -23,15 +23,14 @@ print("Done.")
 boss = BOSS(word_size=4, n_bins=4, window_size=32, sparse=True)
 
 time_a_trans = time.perf_counter()
-X_training_transform = boss.fit_transform(X_training).toarray()
+X_training_transform = boss.fit_transform(X_training)
 time_b_trans = time.perf_counter()
 time_trans = time_b_trans - time_a_trans
 
 time_a_trans = time.perf_counter()
-X_test_transform = boss.transform(X_test).toarray()
+X_test_transform = boss.transform(X_test)
 time_b_trans = time.perf_counter()
 time_trans_test = time_b_trans - time_a_trans
-
 
 time_a = time.perf_counter()
 # SVM

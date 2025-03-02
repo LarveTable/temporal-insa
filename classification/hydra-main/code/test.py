@@ -9,14 +9,14 @@ import numpy as np
 
 print(f"Loading data".ljust(80 - 5, "."), end = "", flush = True)
 
-training_data = np.loadtxt("UCRArchive_2018/BME/BME_TRAIN.tsv")
+training_data = np.loadtxt("UCRArchive_2018/Adiac/Adiac_TRAIN.tsv")
 cleaned_data = np.nan_to_num(training_data[:, 1:], nan=0.0).astype(np.float32) #Cleaned data from NaN values to 0.0
 Y_training, X_training = training_data[:, 0].astype(np.int32), cleaned_data
 
 # Convert X_training to torch.FloatTensor, shape = (num_examples, 1, length)
 X_training = torch.FloatTensor(X_training).unsqueeze(1)
 
-test_data = np.loadtxt("UCRArchive_2018/BME/BME_TEST.tsv")
+test_data = np.loadtxt("UCRArchive_2018/Adiac/Adiac_TEST.tsv")
 cleaned_data = np.nan_to_num(test_data[:, 1:], nan=0.0).astype(np.float32) #Cleaned data from NaN values to 0.0
 Y_test, X_test = test_data[:, 0].astype(np.int32), cleaned_data
 
