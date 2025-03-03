@@ -1,0 +1,9 @@
+<p>page-classification works!</p>
+
+<button (click)="start()">click to bind data with service</button>
+@if(init){
+    <h1>List of algorithmes: {{this.service.ListAlgo}}</h1>
+    <h1>List of datasets: {{this.service.ListDataset}}</h1>
+}
+<h1></h1>
+<button (click)="topagevis()">click to navigate to page visualisation</button>
