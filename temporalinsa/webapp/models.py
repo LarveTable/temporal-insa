@@ -52,3 +52,13 @@ class Result(models.Model):
     # string representation of the object
     def __str__(self):
         return f"{self.experiment} - {self.method} - {self.values}"
+    
+class ClassifierParameters(models.Model):
+    # attached experiment
+    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
+    # values of the parameters
+    values = models.JSONField("Values")
+
+    # string representation of the object
+    def __str__(self):
+        return f"{self.method} - {self.values}"

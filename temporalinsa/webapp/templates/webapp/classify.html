@@ -62,7 +62,23 @@
         .checkbox-item input {
             margin-right: 5px;
         }
-        .algorithm-tabs-container {
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .radio-item {
+            display: flex;
+            align-items: center;
+            background-color: #f0f0f0;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .radio-item input {
+            margin-right: 5px;
+        }
+        .algorithm-tabs-container, .classifier-tabs-container {
             margin-top: 20px;
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -103,7 +119,7 @@
         .tab-panel.active {
             display: block;
         }
-        .no-algorithms-message {
+        .no-algorithms-message, .no-classifier-message {
             padding: 20px;
             color: #666;
             font-style: italic;
@@ -196,7 +212,7 @@
             font-size: 14px;
         }
     </style>
-    <script>
+    <script> // JavaScript pour la gestion des onglets et des dropdowns
         document.addEventListener('DOMContentLoaded', function() {
             // Gestion des algorithmes et des onglets
             const algoCheckboxes = document.querySelectorAll('.algorithm-checkbox');
@@ -285,6 +301,45 @@
                 }
             }
 
+            // Gestion des classifieurs et des onglets
+            const classifierRadios = document.querySelectorAll('.classifier-radio');
+            const classifierTabsContainer = document.querySelector('.classifier-tabs-container');
+            const noClassifierMessage = document.querySelector('.no-classifier-message');
+            
+            classifierRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    updateClassifierTabs();
+                });
+            });
+            
+            // Initialiser les onglets des classifieurs
+            updateClassifierTabs();
+            
+            function updateClassifierTabs() {
+                // Vérifier s'il y a au moins un classifieur sélectionné
+                const selectedClassifier = document.querySelector('.classifier-radio:checked');
+                
+                if (selectedClassifier) {
+                    classifierTabsContainer.style.display = 'block';
+                    noClassifierMessage.style.display = 'none';
+                    
+                    // Masquer tous les panneaux de classifieurs
+                    document.querySelectorAll('.classifier-panel').forEach(panel => {
+                        panel.style.display = 'none';
+                    });
+                    
+                    // Afficher le panneau du classifieur sélectionné
+                    const classifierId = selectedClassifier.value;
+                    const classifierPanel = document.getElementById(`classifier-${classifierId}`);
+                    if (classifierPanel) {
+                        classifierPanel.style.display = 'block';
+                    }
+                } else {
+                    classifierTabsContainer.style.display = 'none';
+                    noClassifierMessage.style.display = 'block';
+                }
+            }
+
             // Gestion du dropdown des datasets
             const dropdownHeader = document.querySelector('.dropdown-header');
             const dropdownContent = document.querySelector('.dropdown-content');
@@ -349,6 +404,100 @@
             updateSelectedCount();
         });
     </script>
+
+    <script> // JavaScript pour envoyer les données de l'expérience au backend Django
+        document.getElementById("start-experiment-btn").addEventListener("click", function () {
+            // Collect experiment name
+            const experimentName = document.getElementById("experiment-name").value.trim();
+        
+            // Collect selected algorithms
+            const selectedAlgorithms = Array.from(document.querySelectorAll(".algorithm-checkbox:checked"))
+                .map(checkbox => ({
+                    name: checkbox.value,
+                    parameters: getAlgorithmParameters(checkbox.value)
+                }));
+        
+            // Collect selected classifier
+            const selectedClassifierRadio = document.querySelector(".classifier-radio:checked");
+            const selectedClassifier = selectedClassifierRadio ? {
+                name: selectedClassifierRadio.value,
+                parameters: getClassifierParameters(selectedClassifierRadio.value)
+            } : null;
+        
+            // Collect selected datasets
+            const selectedDatasets = Array.from(document.querySelectorAll(".dataset-checkbox:checked:not(#dataset-all)"))
+                .map(checkbox => checkbox.nextElementSibling.textContent);
+        
+            // Prepare payload
+            const payload = {
+                name: experimentName,
+                type: "CLS",  // Assuming classification (CLS)
+                date: new Date().toISOString(),
+                datasets: selectedDatasets,
+                classifier: selectedClassifier ? selectedClassifier.name : null,
+                classifier_parameters: selectedClassifier ? selectedClassifier.parameters : null,
+                methods: selectedAlgorithms
+            };
+        
+            // Send data to Django backend
+            fetch('/api/run-experiment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => console.log("Response:", data))
+            .catch(error => console.error("Error:", error));
+        });
+        
+        // Function to extract parameters of selected algorithms
+        function getAlgorithmParameters(algorithm) {
+            const params = {};
+            if (algorithm === "Rocket") {
+                params.num_iterations = document.getElementById("rocket-iterations").value;
+                params.num_kernels = document.getElementById("rocket-kernels").value;
+            } else if (algorithm === "MiniRocket") {
+                params.num_iterations = document.getElementById("minirocket-iterations").value;
+                params.num_features = document.getElementById("minirocket-features").value;
+            } else if (algorithm === "L-Shapelets") {
+                params.num_iterations = document.getElementById("lshapelets-iterations").value;
+                params.min_length = document.getElementById("lshapelets-min-length").value;
+                params.max_length = document.getElementById("lshapelets-max-length").value;
+            } else if (algorithm === "Hydra") {
+                params.num_iterations = document.getElementById("hydra-iterations").value;
+                params.num_heads = document.getElementById("hydra-heads").value;
+            } else if (algorithm === "Boss") {
+                params.num_iterations = document.getElementById("boss-iterations").value;
+                params.window_sizes = document.getElementById("boss-windows").value;
+            }
+            return params;
+        }
+        
+        // Function to extract classifier parameters
+        function getClassifierParameters(classifier) {
+            const params = {};
+            if (classifier === "SVC") {
+                params.C = document.getElementById("svc-c").value;
+                params.kernel = document.getElementById("svc-kernel").value;
+                params.gamma = document.getElementById("svc-gamma").value;
+            } else if (classifier === "RidgeClassifierCV") {
+                params.alphas = document.getElementById("ridge-alphas").value;
+                params.cv = document.getElementById("ridge-cv").value;
+                params.scoring = document.getElementById("ridge-scoring").value;
+            }
+            return params;
+        }
+        
+        // Function to get CSRF token
+        function getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]') ? 
+                document.querySelector('[name=csrfmiddlewaretoken]').value : '';
+        }
+    </script>
+    
 </head>
 <body>
     <nav>
@@ -387,6 +536,20 @@
                 <div class="checkbox-item">
                     <input type="checkbox" id="algo-boss" class="algorithm-checkbox" value="Boss">
                     <label for="algo-boss">Boss</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Choose Classifier:</label>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" id="classifier-svc" name="classifier" class="classifier-radio" value="SVC">
+                    <label for="classifier-svc">SVC</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" id="classifier-ridge" name="classifier" class="classifier-radio" value="RidgeClassifierCV">
+                    <label for="classifier-ridge">RidgeClassifierCV</label>
                 </div>
             </div>
         </div>
@@ -471,11 +634,66 @@
             Select at least one algorithm to configure its parameters.
         </div>
         
+        <div class="classifier-tabs-container">
+            <div class="tab-content">
+                <div id="classifier-SVC" class="classifier-panel">
+                    <h3>SVC Parameters</h3>
+                    <div class="param-group">
+                        <div class="param-item">
+                            <label for="svc-c">C:</label>
+                            <input type="number" id="svc-c" value="1.0" min="0.1" step="0.1">
+                        </div>
+                        <div class="param-item">
+                            <label for="svc-kernel">KERNEL:</label>
+                            <select id="svc-kernel">
+                                <option value="rbf">RBF</option>
+                                <option value="linear">Linear</option>
+                                <option value="poly">Polynomial</option>
+                                <option value="sigmoid">Sigmoid</option>
+                            </select>
+                        </div>
+                        <div class="param-item">
+                            <label for="svc-gamma">GAMMA:</label>
+                            <select id="svc-gamma">
+                                <option value="scale">Scale</option>
+                                <option value="auto">Auto</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div id="classifier-RidgeClassifierCV" class="classifier-panel">
+                    <h3>RidgeClassifierCV Parameters</h3>
+                    <div class="param-group">
+                        <div class="param-item">
+                            <label for="ridge-alphas">ALPHAS:</label>
+                            <input type="text" id="ridge-alphas" value="0.1,1.0,10.0">
+                        </div>
+                        <div class="param-item">
+                            <label for="ridge-cv">CV:</label>
+                            <input type="number" id="ridge-cv" value="5" min="2">
+                        </div>
+                        <div class="param-item">
+                            <label for="ridge-scoring">SCORING:</label>
+                            <select id="ridge-scoring">
+                                <option value="accuracy">Accuracy</option>
+                                <option value="f1">F1</option>
+                                <option value="precision">Precision</option>
+                                <option value="recall">Recall</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="no-classifier-message">
+            Select a classifier to configure its parameters.
+        </div>
+        
         <div class="form-group">
             <label for="dataset-type">Choose Dataset Type:</label>
             <select id="dataset-type">
                 <option value="UCR">UCR</option>
-                <option value="Custom", disabled="true">Custom</option>
+                <option value="Custom" disabled="true">Custom</option>
             </select>
         </div>
         
@@ -535,7 +753,7 @@
             <div id="selected-count" class="selected-count">0 selected</div>
         </div>
         
-        <button class="btn">Start Experiment</button>
+        <button id="start-experiment-btn" class="btn">Start Experiment</button>
     </main>
 </body>
 </html>

@@ -1,7 +1,7 @@
 from ..webapp.models import Experiment, Method, Parameters, Result
 from ..main import ClassifyExperiment
 
-def experimentRequestClassify(name, type, datasets, methods, parameters):
+def experimentRequestClassify(name, type, datasets, methods, parameters, classifier_parameters):
     # Create an experiment with the given parameters, datasets is a list of dataset names as a json field
     experiment = Experiment.objects.create(name=name, type=type, datasets=datasets)
     # Methods is a list of method names
@@ -14,12 +14,14 @@ def experimentRequestClassify(name, type, datasets, methods, parameters):
     if checkParametersValidity(type, experiment):
         # create the experiment instance
         exp = ClassifyExperiment(experiment)
-        # run and return the experiment
-        return exp.run()
+        # run and return the experiment id
+        id = exp.run()
+        return id
     else:
         experiment.delete()
         return None
 
 def checkParametersValidity(type, experiment):
     # Check if the parameters are valid for the given experiment type
+    #TODO
     return True
