@@ -1,15 +1,33 @@
-from ..webapp.models import Experiment, Method, Parameters, Result
-from ..main import ClassifyExperiment
+from webapp.models import Experiment, Method, Parameters, Result, ClassifierParameters
+from main import ClassifyExperiment
 
-def experimentRequestClassify(name, type, datasets, methods, parameters, classifier_parameters):
+def experimentRequestClassify(data):
     # Create an experiment with the given parameters, datasets is a list of dataset names as a json field
-    experiment = Experiment.objects.create(name=name, type=type, datasets=datasets)
-    # Methods is a list of method names
-    for method in methods:
-        method = Method.objects.create(experiment=experiment, name=method)
-        # Parameters is a list of parameter values as a json field with method name and associated parameters
-        for parameter in parameters:
-            Parameters.objects.create(method=method, values=parameter)
+    experiment = Experiment.objects.create(name=data.get("name"), type=data.get("type"), 
+                                           datasets=data.get("datasets"), 
+                                           scaler=data.get("scaler"), 
+                                           classifier=data.get("classifier"), 
+                                           date=data.get("date"))
+    
+    # Save classifier parameters
+    if data.get("classifier_parameters"):
+        ClassifierParameters.objects.create(
+            experiment=experiment,
+            values=data["classifier_parameters"]
+        )
+
+    # Create Method entries
+    for method_data in data.get("methods", []):
+        method = Method.objects.create(
+            experiment=experiment,
+            name=method_data["name"]
+        )
+
+        # Save method parameters
+        Parameters.objects.create(
+            method=method,
+            values=method_data["parameters"]
+        )
     
     if checkParametersValidity(type, experiment):
         # create the experiment instance

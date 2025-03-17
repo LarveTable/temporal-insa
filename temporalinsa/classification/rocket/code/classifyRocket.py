@@ -1,5 +1,5 @@
-from rocket_functions import generate_kernels, apply_kernels
-from getClassifier import getClassifier
+from classification.rocket.code.rocket_functions import generate_kernels, apply_kernels
+from classification.getClassifier import getClassifier
 
 def classifyRocket(parameters, classifier, classifier_params, X_Train, X_Test, Y_Train, Y_Test):
     

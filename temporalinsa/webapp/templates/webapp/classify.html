@@ -406,96 +406,100 @@
     </script>
 
     <script> // JavaScript pour envoyer les données de l'expérience au backend Django
-        document.getElementById("start-experiment-btn").addEventListener("click", function () {
-            // Collect experiment name
-            const experimentName = document.getElementById("experiment-name").value.trim();
-        
-            // Collect selected algorithms
-            const selectedAlgorithms = Array.from(document.querySelectorAll(".algorithm-checkbox:checked"))
-                .map(checkbox => ({
-                    name: checkbox.value,
-                    parameters: getAlgorithmParameters(checkbox.value)
-                }));
-        
-            // Collect selected classifier
-            const selectedClassifierRadio = document.querySelector(".classifier-radio:checked");
-            const selectedClassifier = selectedClassifierRadio ? {
-                name: selectedClassifierRadio.value,
-                parameters: getClassifierParameters(selectedClassifierRadio.value)
-            } : null;
-        
-            // Collect selected datasets
-            const selectedDatasets = Array.from(document.querySelectorAll(".dataset-checkbox:checked:not(#dataset-all)"))
-                .map(checkbox => checkbox.nextElementSibling.textContent);
-        
-            // Prepare payload
-            const payload = {
-                name: experimentName,
-                type: "CLS",  // Assuming classification (CLS)
-                date: new Date().toISOString(),
-                datasets: selectedDatasets,
-                classifier: selectedClassifier ? selectedClassifier.name : null,
-                classifier_parameters: selectedClassifier ? selectedClassifier.parameters : null,
-                methods: selectedAlgorithms
-            };
-        
-            // Send data to Django backend
-            fetch('/api/run-experiment/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCSRFToken()
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(response => response.json())
-            .then(data => console.log("Response:", data))
-            .catch(error => console.error("Error:", error));
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("start-experiment-btn").addEventListener("click", function () {
+                // Collect experiment name
+                const experimentName = document.getElementById("experiment-name").value.trim();
+            
+                // Collect selected algorithms
+                const selectedAlgorithms = Array.from(document.querySelectorAll(".algorithm-checkbox:checked"))
+                    .map(checkbox => ({
+                        name: checkbox.value,
+                        parameters: getAlgorithmParameters(checkbox.value)
+                    }));
+            
+                // Collect selected classifier
+                const selectedClassifierRadio = document.querySelector(".classifier-radio:checked");
+                const selectedClassifier = selectedClassifierRadio ? {
+                    name: selectedClassifierRadio.value,
+                    parameters: getClassifierParameters(selectedClassifierRadio.value)
+                } : null;
+            
+                // Collect selected datasets
+                const selectedDatasets = Array.from(document.querySelectorAll(".dataset-checkbox:checked:not(#dataset-all)"))
+                    .map(checkbox => checkbox.nextElementSibling.textContent);
+            
+                // Prepare payload
+                const payload = {
+                    name: experimentName,
+                    type: "CLS",  // Assuming classification (CLS)
+                    date: new Date().toISOString(),
+                    datasets: selectedDatasets,
+                    classifier: selectedClassifier ? selectedClassifier.name : null,
+                    classifier_parameters: selectedClassifier ? selectedClassifier.parameters : null,
+                    methods: selectedAlgorithms,
+                    scaler: "StandardScaler"  // Assuming StandardScaler for now
+                };
+            
+                // Send data to Django backend
+                fetch('/webapp/classifyRequest/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        // Redirect to the result page with the experiment ID
+                        window.location.href = `/result/${data.experiment_id}/`;
+                    } else {
+                        alert("Error: " + data.error);
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            });
+            
+            // Function to extract parameters of selected algorithms
+            function getAlgorithmParameters(algorithm) {
+                const params = {};
+                if (algorithm === "Rocket") {
+                    params.num_iterations = document.getElementById("rocket-iterations").value;
+                    params.num_kernels = document.getElementById("rocket-kernels").value;
+                } else if (algorithm === "MiniRocket") {
+                    params.num_iterations = document.getElementById("minirocket-iterations").value;
+                    params.num_features = document.getElementById("minirocket-features").value;
+                } else if (algorithm === "L-Shapelets") {
+                    params.num_iterations = document.getElementById("lshapelets-iterations").value;
+                    params.min_length = document.getElementById("lshapelets-min-length").value;
+                    params.max_length = document.getElementById("lshapelets-max-length").value;
+                } else if (algorithm === "Hydra") {
+                    params.num_iterations = document.getElementById("hydra-iterations").value;
+                    params.num_heads = document.getElementById("hydra-heads").value;
+                } else if (algorithm === "Boss") {
+                    params.num_iterations = document.getElementById("boss-iterations").value;
+                    params.window_sizes = document.getElementById("boss-windows").value;
+                }
+                return params;
+            }
+            
+            // Function to extract classifier parameters
+            function getClassifierParameters(classifier) {
+                const params = {};
+                if (classifier === "SVC") {
+                    params.C = document.getElementById("svc-c").value;
+                    params.kernel = document.getElementById("svc-kernel").value;
+                    params.gamma = document.getElementById("svc-gamma").value;
+                } else if (classifier === "RidgeClassifierCV") {
+                    params.alphas = document.getElementById("ridge-alphas").value;
+                    params.cv = document.getElementById("ridge-cv").value;
+                    params.scoring = document.getElementById("ridge-scoring").value;
+                }
+                return params;
+            }
         });
-        
-        // Function to extract parameters of selected algorithms
-        function getAlgorithmParameters(algorithm) {
-            const params = {};
-            if (algorithm === "Rocket") {
-                params.num_iterations = document.getElementById("rocket-iterations").value;
-                params.num_kernels = document.getElementById("rocket-kernels").value;
-            } else if (algorithm === "MiniRocket") {
-                params.num_iterations = document.getElementById("minirocket-iterations").value;
-                params.num_features = document.getElementById("minirocket-features").value;
-            } else if (algorithm === "L-Shapelets") {
-                params.num_iterations = document.getElementById("lshapelets-iterations").value;
-                params.min_length = document.getElementById("lshapelets-min-length").value;
-                params.max_length = document.getElementById("lshapelets-max-length").value;
-            } else if (algorithm === "Hydra") {
-                params.num_iterations = document.getElementById("hydra-iterations").value;
-                params.num_heads = document.getElementById("hydra-heads").value;
-            } else if (algorithm === "Boss") {
-                params.num_iterations = document.getElementById("boss-iterations").value;
-                params.window_sizes = document.getElementById("boss-windows").value;
-            }
-            return params;
-        }
-        
-        // Function to extract classifier parameters
-        function getClassifierParameters(classifier) {
-            const params = {};
-            if (classifier === "SVC") {
-                params.C = document.getElementById("svc-c").value;
-                params.kernel = document.getElementById("svc-kernel").value;
-                params.gamma = document.getElementById("svc-gamma").value;
-            } else if (classifier === "RidgeClassifierCV") {
-                params.alphas = document.getElementById("ridge-alphas").value;
-                params.cv = document.getElementById("ridge-cv").value;
-                params.scoring = document.getElementById("ridge-scoring").value;
-            }
-            return params;
-        }
-        
-        // Function to get CSRF token
-        function getCSRFToken() {
-            return document.querySelector('[name=csrfmiddlewaretoken]') ? 
-                document.querySelector('[name=csrfmiddlewaretoken]').value : '';
-        }
+
     </script>
     
 </head>
