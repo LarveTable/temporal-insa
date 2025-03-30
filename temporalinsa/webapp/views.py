@@ -19,8 +19,17 @@ def new(request):
 def classify(request):
     return render(request, "webapp/classify.html")
 
+# Ici page de documentation
+def documentation(request):
+    return render(request, "webapp/documentation.html")
+
+# Ici page d'importation
+def importation(request):
+    return render(request, "webapp/importation.html")
+
 def result(request, experiment_id):
     # Retrieve the experiment
+    print(experiment_id)
     experiment = get_object_or_404(Experiment, id=experiment_id)
 
     # Retrieve the results for every method of the experiment
@@ -32,14 +41,14 @@ def result(request, experiment_id):
 @csrf_exempt
 def classifyRequest(request):
     if request.method == 'POST':
-        try:
+        #try:
             data = json.loads(request.body)
 
             experiment_id = experimentRequestClassify(data)
 
             return JsonResponse({"status": "success", "experiment_id": experiment_id}, status=201)
 
-        except Exception as e:
-            return JsonResponse({"status": "error", "error": str(e)}, status=400)
+        #except Exception as e:
+         #   return JsonResponse({"status": "error", "error": str(e)}, status=400)
 
     return JsonResponse({"status": "error", "error": "Invalid request"}, status=400)

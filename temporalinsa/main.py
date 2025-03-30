@@ -1,4 +1,4 @@
-from webapp.models import Method, Parameters, Result, ClassifierParameters
+from webapp.models import Experiment, Method, Parameters, Result, ClassifierParameters
 from preprocess.process_dataset import Processing
 from classification.classify import requestClassifyRocket, requestClassifyMiniRocket, requestClassifyHydra, requestClassifyBoss, requestClassifyLShapelets
 
@@ -11,7 +11,7 @@ class ClassifyExperiment:
         # matching dictionnaire of parameters corresponding to the methods
         self.parameters = {}
         for method in self.methods:
-            self.parameters[method.name] = Parameters.objects.filter(method=method.id)
+            self.parameters[method.name] = Parameters.objects.get(method=method.id)
         # datasets of the experiment
         self.datasets = experiment.datasets
         # scaler of the experiment
@@ -30,20 +30,22 @@ class ClassifyExperiment:
             # loop on methods
             for method in self.methods:
                 # returning results of the classification (accuracy, f1-score, etc.)
-                match method:
-                    case "rocket":
-                        result = requestClassifyRocket(self.parameters[method.name], self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
-                    case "miniRocket":
-                        result = requestClassifyMiniRocket(self.parameters[method.name], self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
-                    case "hydra":
-                        result = requestClassifyHydra(self.parameters[method.name], self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
-                    case "boss":
-                        result = requestClassifyBoss(self.parameters[method.name], self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
-                    case "lShapelets":
-                        result = requestClassifyLShapelets(self.parameters[method.name], self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
+                match method.name:
+                    case "Rocket":
+                        result = requestClassifyRocket(self.parameters[method.name].values, self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
+                    case "MiniRocket":
+                        result = requestClassifyMiniRocket(self.parameters[method.name].values, self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
+                    case "Hydra":
+                        result = requestClassifyHydra(self.parameters[method.name].values, self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
+                    case "Boss":
+                        result = requestClassifyBoss(self.parameters[method.name].values, self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
+                    case "L-Shapelets":
+                        result = requestClassifyLShapelets(self.parameters[method.name].values, self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
                     case _:
                         raise ValueError("Invalid method")
                     
                 # save the results
-                Result.objects.create(experiment=self.id, method=method.id, values=result)
+                exp = Experiment.objects.get(id=self.id)
+                method = Method.objects.get(id=method.id)
+                Result.objects.create(experiment=exp, method=method, values=result)
         return self.id

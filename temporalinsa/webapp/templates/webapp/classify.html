@@ -211,6 +211,43 @@
             color: #666;
             font-size: 14px;
         }
+
+        /*Loading screen*/
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #0056b3;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
     <script> // JavaScript pour la gestion des onglets et des dropdowns
         document.addEventListener('DOMContentLoaded', function() {
@@ -440,7 +477,10 @@
                     methods: selectedAlgorithms,
                     scaler: "StandardScaler"  // Assuming StandardScaler for now
                 };
-            
+
+                // Display loading screen
+                document.getElementById("loading-screen").style.display = "flex";
+
                 // Send data to Django backend
                 fetch('/webapp/classifyRequest/', {
                     method: 'POST',
@@ -451,14 +491,22 @@
                 })
                 .then(response => response.json())
                 .then(data => {
+                    // Hide loading screen on response
+                    document.getElementById("loading-screen").style.display = "none";
+
                     if (data.status === "success") {
                         // Redirect to the result page with the experiment ID
-                        window.location.href = `/result/${data.experiment_id}/`;
+                        window.location.href = `/webapp/result/${data.experiment_id}/`;
                     } else {
                         alert("Error: " + data.error);
                     }
                 })
-                .catch(error => console.error("Error:", error));
+                .catch(error => {
+                    // Hide loading screen on error
+                    document.getElementById("loading-screen").style.display = "none";
+                    console.error("Error:", error);
+                    alert("Une erreur s'est produite lors du traitement de la demande.");
+                });
             });
             
             // Function to extract parameters of selected algorithms
@@ -507,8 +555,8 @@
     <nav>
         <a href="{% url 'webapp:index' %}">Home</a>
         <a href="{% url 'webapp:new' %}">New experiment</a>
-        <a href="#">Load experiment</a>
-        <a href="#">Documentation</a>
+        <a href="{% url 'webapp:importation' %}">Load experiment</a>
+        <a href="{% url 'webapp:documentation' %}">Documentation</a>
     </nav>
     <main>
         <h2>Setup Classification Experiment</h2>
@@ -759,5 +807,15 @@
         
         <button id="start-experiment-btn" class="btn">Start Experiment</button>
     </main>
+
+    <!-- Loading screen -->
+    <div class="loading-container" id="loading-screen">
+        <div class="spinner"></div>
+        <div class="loading-text">
+            <p>Traitement de l'expérience en cours...</p>
+            <p>Veuillez patienter</p>
+        </div>
+    </div>
+
 </body>
 </html>

@@ -8,7 +8,7 @@ def experimentRequestClassify(data):
                                            scaler=data.get("scaler"), 
                                            classifier=data.get("classifier"), 
                                            date=data.get("date"))
-    
+
     # Save classifier parameters
     if data.get("classifier_parameters"):
         ClassifierParameters.objects.create(
@@ -22,6 +22,7 @@ def experimentRequestClassify(data):
             experiment=experiment,
             name=method_data["name"]
         )
+        method = Method.objects.get(id=method.id)
 
         # Save method parameters
         Parameters.objects.create(

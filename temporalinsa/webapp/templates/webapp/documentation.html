@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temporal'INSA - Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        nav {
+            background-color: #0056b3;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        header {
+            background-color: #007BFF;
+            color: white;
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+        }
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        section {
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #0056b3;
+        }
+        .code-block {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .feature-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .feature-list li {
+            background-color: #f8f9fa;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-left: 4px solid #28a745;
+        }
+        .note {
+            background-color: #e9ecef;
+            border-left: 4px solid #17a2b8;
+            padding: 10px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'webapp:index' %}">Home</a>
+        <a href="{% url 'webapp:new' %}">New experiment</a>
+        <a href="{% url 'webapp:importation' %}">Load experiment</a>
+        <a href="{% url 'webapp:documentation' %}">Documentation</a>
+    </nav>
+    
+    <header>
+        <h1>Temporal'INSA - Documentation</h1>
+    </header>
+    
+    <main>
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>Temporal'INSA is a web application designed for advanced time series classification and analysis. It provides researchers and data scientists with a flexible platform to experiment with various time series classification algorithms.</p>
+        
+            <div class="note">
+                <strong>Key Features:</strong>
+                <ul class="feature-list">
+                    <li>Multiple time series classification algorithms</li>
+                    <li>Customizable experiment parameters</li>
+                    <li>Support for UCR time series datasets</li>
+                    <li>Comprehensive result visualization</li>
+                </ul>
+            </div>
+        </section>
+        
+        <section id="supported-algorithms">
+            <h2>Supported Algorithms</h2>
+            <p>The platform currently supports the following time series classification algorithms:</p>
+            
+            <div class="code-block">
+                <ul>
+                    <li><strong>Rocket:</strong> A fast and accurate time series classification method</li>
+                    <li><strong>MiniRocket:</strong> A more computationally efficient version of Rocket</li>
+                    <li><strong>L-Shapelets:</strong> Learn discriminative shapelets for classification</li>
+                    <li><strong>Hydra:</strong> A multi-head time series classification approach</li>
+                    <li><strong>Boss:</strong> Bag-of-SFA-Symbols method for time series classification</li>
+                </ul>
+            </div>
+        </section>
+        
+        <section id="supported-classifiers">
+            <h2>Supported Classifiers</h2>
+            <p>The application offers two primary classifiers for final classification:</p>
+            
+            <div class="code-block">
+                <ul>
+                    <li><strong>SVC (Support Vector Classifier):</strong>
+                        <ul>
+                            <li>Supports multiple kernel types (RBF, Linear, Polynomial, Sigmoid)</li>
+                            <li>Customizable regularization parameter (C)</li>
+                            <li>Flexible gamma settings</li>
+                        </ul>
+                    </li>
+                    <li><strong>RidgeClassifierCV:</strong>
+                        <ul>
+                            <li>Cross-validated ridge regression classifier</li>
+                            <li>Configurable alpha values</li>
+                            <li>Multiple scoring metrics (Accuracy, F1, Precision, Recall)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+        
+        <section id="datasets">
+            <h2>Dataset Support</h2>
+            <p>Currently, the platform supports the UCR Time Series Classification Archive datasets, including:</p>
+            
+            <div class="code-block">
+                <ul>
+                    <li>ADIAC</li>
+                    <li>ACSF1</li>
+                    <li>BEEF</li>
+                    <li>CAR</li>
+                    <li>CBF</li>
+                    <li>ChlorineConcentration</li>
+                    <li>CinCECGTorso</li>
+                    <li>COFFEE</li>
+                    <li>ECG200</li>
+                    <li>ECG5000</li>
+                </ul>
+            </div>
+            
+            <div class="note">
+                <strong>Note:</strong> Custom dataset support is planned for future releases.
+            </div>
+        </section>
+        
+        <section id="experiment-workflow">
+            <h2>Experiment Workflow</h2>
+            <ol>
+                <li><strong>Name Your Experiment:</strong> Provide a descriptive name for tracking purposes</li>
+                <li><strong>Select Algorithms:</strong> Choose one or more time series classification algorithms</li>
+                <li><strong>Configure Parameters:</strong> Adjust algorithm-specific parameters</li>
+                <li><strong>Choose Classifier:</strong> Select and configure your preferred classifier</li>
+                <li><strong>Select Datasets:</strong> Pick one or more UCR datasets</li>
+                <li><strong>Start Experiment:</strong> Launch the classification process</li>
+            </ol>
+        </section>
+        
+        <section id="result-interpretation">
+            <h2>Results Interpretation</h2>
+            <p>After an experiment, you'll receive a detailed results page showing:</p>
+            <ul>
+                <li>Experiment metadata (ID, name, date, datasets)</li>
+                <li>Performance metrics for each method</li>
+                <li>Raw classification results</li>
+            </ul>
+        </section>
+    </main>
+</body>
+</html>

@@ -5,7 +5,7 @@ def classifyRocket(parameters, classifier, classifier_params, X_Train, X_Test, Y
     
     # Rocket run
     input_length = X_Train.shape[-1]
-    kernels = generate_kernels(input_length, parameters["num_kernels"])
+    kernels = generate_kernels(input_length, int(parameters["num_kernels"]))
     X_training_transform = apply_kernels(X_Train, kernels)
     X_test_transform = apply_kernels(X_Test, kernels)
 

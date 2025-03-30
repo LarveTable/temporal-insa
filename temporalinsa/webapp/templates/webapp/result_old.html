@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #0056b3;
+        }
+        .experiment-info {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .results-container {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+        }
+        .result-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-left: 5px solid #0056b3;
+            background: #f9f9f9;
+        }
+        pre {
+            background: #eee;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Experiment Results</h1>
+
+    <div class="experiment-info">
+        <p><strong>Experiment ID:</strong> {{ experiment.id }}</p>
+        <p><strong>Name:</strong> {{ experiment.name }}</p>
+        <p><strong>Type:</strong> {{ experiment.type }}</p>
+        <p><strong>Date Created:</strong> {{ experiment.date }}</p>
+        <p><strong>Datasets:</strong> {{ experiment.datasets }}</p>
+        <p><strong>Classifier:</strong> {{ experiment.classifier }}</p>
+    </div>
+
+    <h2>Method Results</h2>
+
+    <div class="results-container">
+        {% for result in results %}
+            <div class="result-item">
+                <p><strong>Method:</strong> {{ result.method.name }}</p>
+                <p><strong>Results:</strong></p>
+                <pre>{{ result.values | safe }}</pre>
+            </div>
+        {% empty %}
+            <p>No results available for this experiment.</p>
+        {% endfor %}
+    </div>
+
+</body>
+</html>

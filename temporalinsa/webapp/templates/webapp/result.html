@@ -3,69 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Experiment Results</title>
+    <title>Temporal'INSA - Experiment Results</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
         }
-        h1 {
-            color: #0056b3;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
-        .experiment-info {
-            background: white;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
         }
-        .results-container {
-            background: white;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
-        .result-item {
-            margin-bottom: 15px;
+        header {
+            background-color: #007BFF;
+            color: white;
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+        }
+        nav {
+            background-color: #0056b3;
             padding: 10px;
-            border-left: 5px solid #0056b3;
-            background: #f9f9f9;
+            text-align: center;
         }
-        pre {
-            background: #eee;
-            padding: 10px;
-            border-radius: 5px;
-            overflow-x: auto;
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        h1{
+            display: block;
+            font-size: 2em;
+            margin-block-start: 0.67em;
+            margin-block-end: 0.67em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+            font-weight: bold;
         }
     </style>
 </head>
-<body>
 
-    <h1>Experiment Results</h1>
+<body class="bg-gray-100">
 
-    <div class="experiment-info">
-        <p><strong>Experiment ID:</strong> {{ experiment.id }}</p>
-        <p><strong>Name:</strong> {{ experiment.name }}</p>
-        <p><strong>Type:</strong> {{ experiment.type }}</p>
-        <p><strong>Date Created:</strong> {{ experiment.date }}</p>
-        <p><strong>Datasets:</strong> {{ experiment.datasets }}</p>
-        <p><strong>Classifier:</strong> {{ experiment.classifier }}</p>
-    </div>
+    <nav>
+        <a href="{% url 'webapp:index' %}">Home</a>
+        <a href="{% url 'webapp:new' %}">New experiment</a>
+        <a href="{% url 'webapp:importation' %}">Load experiment</a>
+        <a href="{% url 'webapp:documentation' %}">Documentation</a>
+    </nav>
+    <header> 
+        <h1>Temporal'INSA - Experiment Results</h1> 
+    </header>
 
-    <h2>Method Results</h2>
-
-    <div class="results-container">
-        {% for result in results %}
-            <div class="result-item">
-                <p><strong>Method:</strong> {{ result.method.name }}</p>
-                <p><strong>Results:</strong></p>
-                <pre>{{ result.values | safe }}</pre>
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="bg-blue-600 text-white p-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold">Experiment Results</h1>
+                        <p id="experiment-name" class="text-blue-100">Experiment Name</p>
+                    </div>
+                    <div class="text-right">
+                        <p id="experiment-date" class="text-blue-200">Date</p>
+                        <p id="experiment-id" class="text-sm text-blue-300">Experiment ID</p>
+                    </div>
+                </div>
             </div>
-        {% empty %}
-            <p>No results available for this experiment.</p>
-        {% endfor %}
+
+            <div class="p-6">
+                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-blue-800 mb-2">Datasets</h3>
+                        <ul id="dataset-list" class="text-sm text-blue-600"></ul>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-green-800 mb-2">Classifier</h3>
+                        <p id="classifier-info" class="text-green-600"></p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-purple-800 mb-2">Methods</h3>
+                        <ul id="method-list" class="text-sm text-purple-600"></ul>
+                    </div>
+                </div>
+
+                <div id="results-summary" class="mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Performance Summary</h2>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white shadow rounded-lg p-4">
+                            <canvas id="accuracy-chart"></canvas>
+                        </div>
+                        <div class="bg-white shadow rounded-lg p-4">
+                            <canvas id="f1-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="detailed-results" class="bg-white shadow rounded-lg">
+                    <div class="p-4 bg-gray-100 border-b">
+                        <h2 class="text-xl font-bold text-gray-800">Detailed Method Results</h2>
+                    </div>
+                    <div id="method-results" class="p-4 max-h-96 overflow-y-auto custom-scrollbar">
+                        <!-- Detailed results will be dynamically populated -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <script>
+        // Placeholder function to populate the page with experiment data
+        function populateResultPage(experimentData) {
+            // Experiment basic info
+            document.getElementById('experiment-name').textContent = experimentData.name;
+            document.getElementById('experiment-date').textContent = new Date(experimentData.date).toLocaleString();
+            document.getElementById('experiment-id').textContent = `Experiment ID: ${experimentData.id}`;
+
+            // Datasets
+            const datasetList = document.getElementById('dataset-list');
+            experimentData.datasets.forEach(dataset => {
+                const li = document.createElement('li');
+                li.textContent = dataset;
+                datasetList.appendChild(li);
+            });
+
+            // Classifier
+            document.getElementById('classifier-info').textContent = `${experimentData.classifier}`;
+
+            // Methods
+            const methodList = document.getElementById('method-list');
+            experimentData.methods.forEach(method => {
+                const li = document.createElement('li');
+                li.textContent = method.name;
+                methodList.appendChild(li);
+            });
+
+            // Populate detailed results
+            const methodResults = document.getElementById('method-results');
+            experimentData.results.forEach(result => {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'mb-4 p-3 bg-gray-50 rounded';
+                resultDiv.innerHTML = `
+                    <h3 class="font-semibold text-gray-700 mb-2">${result.method}</h3>
+                    <pre class="text-sm text-gray-600 overflow-x-auto">${JSON.stringify(result.values, null, 2)}</pre>
+                `;
+                methodResults.appendChild(resultDiv);
+            });
+
+            // Charts (example implementation)
+            createPerformanceCharts(experimentData.results);
+        }
+
+        function createPerformanceCharts(results) {
+            const accuracyCtx = document.getElementById('accuracy-chart').getContext('2d');
+            const f1Ctx = document.getElementById('f1-chart').getContext('2d');
+
+            new Chart(accuracyCtx, {
+                type: 'bar',
+                data: {
+                    labels: results.map(r => r.method),
+                    datasets: [{
+                        label: 'Accuracy',
+                        data: results.map(r => r.values.accuracy),
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    title: { display: true, text: 'Accuracy by Method' }
+                }
+            });
+
+            new Chart(f1Ctx, {
+                type: 'bar',
+                data: {
+                    labels: results.map(r => r.method),
+                    datasets: [{
+                        label: 'F1 Score',
+                        data: results.map(r => r.values.f1_score),
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    title: { display: true, text: 'F1 Score by Method' }
+                }
+            });
+        }
+
+        // Example usage (to be replaced with actual backend data)
+        const sampleExperimentData = {
+            id: 'EXP-001',
+            name: 'UCR Time Series Classification',
+            type: 'Classification',
+            date: new Date().toISOString(),
+            datasets: ['ADIAC', 'ECG200', 'CBF'],
+            classifier: 'SVC (RBF Kernel)',
+            methods: [
+                { name: 'Rocket' },
+                { name: 'MiniRocket' },
+                { name: 'L-Shapelets' }
+            ],
+            results: [
+                { 
+                    method: 'Rocket', 
+                    values: { 
+                        accuracy: 0.92, 
+                        f1_score: 0.91, 
+                        precision: 0.93, 
+                        recall: 0.90 
+                    } 
+                },
+                { 
+                    method: 'MiniRocket', 
+                    values: { 
+                        accuracy: 0.88, 
+                        f1_score: 0.87, 
+                        precision: 0.89, 
+                        recall: 0.86 
+                    } 
+                },
+                { 
+                    method: 'L-Shapelets', 
+                    values: { 
+                        accuracy: 0.85, 
+                        f1_score: 0.84, 
+                        precision: 0.86, 
+                        recall: 0.83 
+                    } 
+                }
+            ]
+        };
+
+        // Populate the page with sample data (replace with actual backend call)
+        document.addEventListener('DOMContentLoaded', () => {
+            populateResultPage(sampleExperimentData);
+        });
+    </script>
 </body>
 </html>

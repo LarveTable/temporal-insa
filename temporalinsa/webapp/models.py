@@ -2,8 +2,6 @@ from django.db import models
 
 # Create your models here.
 class Experiment(models.Model):
-    # id of the experiment
-    id = models.IntegerField("ID", primary_key=True)
     # name of the experiment
     name = models.CharField("Name", max_length=20, null=True)
     # type of the experiment
@@ -61,4 +59,4 @@ class ClassifierParameters(models.Model):
 
     # string representation of the object
     def __str__(self):
-        return f"{self.method} - {self.values}"
+        return f"{self.experiment} - {self.values}"

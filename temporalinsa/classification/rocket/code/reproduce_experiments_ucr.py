@@ -48,9 +48,9 @@ from sklearn.pipeline import make_pipeline
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("-d", "--dataset_names", required = True)
-parser.add_argument("-i", "--input_path", required = True)
-parser.add_argument("-o", "--output_path", required = True)
+parser.add_argument("-d", "--dataset_names", required = False)
+parser.add_argument("-i", "--input_path", required = False)
+parser.add_argument("-o", "--output_path", required = False)
 parser.add_argument("-n", "--num_runs", type = int, default = 10)
 parser.add_argument("-k", "--num_kernels", type = int, default = 10_000)
 
@@ -58,7 +58,8 @@ arguments = parser.parse_args()
 
 # == run =======================================================================
 
-dataset_names = np.loadtxt(arguments.dataset_names, "str")
+#dataset_names = np.loadtxt(arguments.dataset_names, "str")
+dataset_names = ["Adiac"] #Modified to run only one dataset
 
 results = pd.DataFrame(index = dataset_names,
                        columns = ["accuracy_mean",
@@ -78,12 +79,14 @@ for dataset_name in dataset_names:
 
     print(f"Loading data".ljust(80 - 5, "."), end = "", flush = True)
 
-    training_data = np.loadtxt(f"{arguments.input_path}/{dataset_name}/{dataset_name}_TRAIN.tsv")
-    cleaned_data = np.nan_to_num(training_data[:, 1:], nan=0.0) #Cleaned data from NaN values to 0.0
+    # extract training data
+    training_data = np.loadtxt("temporalinsa/UCRArchive_2018/Adiac/Adiac_TRAIN.tsv")
+    cleaned_data = np.nan_to_num(training_data[:, 1:], nan=0.0).astype(np.float64) #Cleaned data from NaN values to 0.0
     Y_training, X_training = training_data[:, 0].astype(np.int32), cleaned_data
 
-    test_data = np.loadtxt(f"{arguments.input_path}/{dataset_name}/{dataset_name}_TEST.tsv")
-    cleaned_data = np.nan_to_num(test_data[:, 1:], nan=0.0) #Cleaned data from NaN values to 0.0
+    # extract test data
+    test_data = np.loadtxt("temporalinsa/UCRArchive_2018/Adiac/Adiac_TEST.tsv")
+    cleaned_data = np.nan_to_num(test_data[:, 1:], nan=0.0).astype(np.float64) #Cleaned data from NaN values to 0.0
     Y_test, X_test = test_data[:, 0].astype(np.int32), cleaned_data
 
     print("Done.")

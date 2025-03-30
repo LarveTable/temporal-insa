@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temporal'Insa - Home</title>
+    <title>Temporal'INSA - Home</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -70,18 +70,18 @@
     <nav>
         <a href="{% url 'webapp:index' %}">Home</a>
         <a href="{% url 'webapp:new' %}">New experiment</a>
-        <a href="#">Load experiment</a>
-        <a href="#">Documentation</a>
+        <a href="{% url 'webapp:importation' %}">Load experiment</a>
+        <a href="{% url 'webapp:documentation' %}">Documentation</a>
     </nav>
     <header>
-        <h1>Temporal'INSA - Classification and Generation of Time Series</h1>
+        <h1>Temporal'INSA - Classification of Time Series</h1>
     </header>
     <main>
         <p>Welcome, choose your action.</p>
         <a href="{% url 'webapp:new' %}" class="btn btn-primary">New Experiment</a>
-        <a href="#" class="btn btn-secondary">Learn More</a>
+        <a href="{% url 'webapp:documentation' %}" class="btn btn-secondary">Learn More</a>
         <br>
-        <a href="#" class="btn btn-tertiary">Load Experiment</a>
+        <a href="{% url 'webapp:importation' %}" class="btn btn-tertiary">Load Experiment</a>
     </main>
 </body>
 </html>
