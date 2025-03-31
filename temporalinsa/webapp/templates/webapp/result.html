@@ -120,6 +120,10 @@
         </div>
     </div>
 
+    <script id="experiment-data" type="application/json">
+        {{ experiment_data_json|safe }}
+    </script>
+
     <script>
         // Placeholder function to populate the page with experiment data
         function populateResultPage(experimentData) {
@@ -248,10 +252,13 @@
             ]
         };
 
-        // Populate the page with sample data (replace with actual backend call)
-        document.addEventListener('DOMContentLoaded', () => {
-            populateResultPage(sampleExperimentData);
-        });
+    // Récupérer les données d'expérience depuis le backend
+    const experimentData = JSON.parse(document.getElementById('experiment-data').textContent);
+
+    // Populate the page with data from the backend
+    document.addEventListener('DOMContentLoaded', () => {
+        populateResultPage(experimentData);
+    });
     </script>
 </body>
 </html>

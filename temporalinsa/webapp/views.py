@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
 from result.requestExperiment import experimentRequestClassify
-from webapp.models import Experiment, Result
+from webapp.models import ClassifierParameters, Experiment, Method, Parameters, Result
 
 # Create your views here.
 # Ici c'est la page d'acceuil
@@ -27,15 +27,59 @@ def documentation(request):
 def importation(request):
     return render(request, "webapp/importation.html")
 
+# Ici page de visualisation des résultats
 def result(request, experiment_id):
-    # Retrieve the experiment
-    print(experiment_id)
     experiment = get_object_or_404(Experiment, id=experiment_id)
-
-    # Retrieve the results for every method of the experiment
+    
+    # Récupérer les méthodes utilisées dans cette expérience
+    methods = Method.objects.filter(experiment=experiment)
+    
+    # Récupérer les résultats pour chaque méthode
     results = Result.objects.filter(experiment=experiment)
+    
+    # Récupérer les paramètres du classifieur si disponibles
+    try:
+        classifier_params = ClassifierParameters.objects.get(experiment=experiment).values
+    except ClassifierParameters.DoesNotExist:
+        classifier_params = {}
+    
+    # Créer un dictionnaire pour stocker toutes les informations de l'expérience
+    experiment_data = {
+        "id": experiment.id,
+        "name": experiment.name if experiment.name else f"Experiment {experiment.id}",
+        "type": experiment.type,
+        "date": experiment.date.isoformat(),
+        "datasets": experiment.datasets,  # Déjà un JSONField
+        "classifier": experiment.classifier,
+        "classifier_params": classifier_params,
+        "methods": [],
+        "results": []
+    }
+    
+    # Ajouter les méthodes et leurs paramètres
+    for method in methods:
+        method_info = {"name": method.name}
+        
+        # Récupérer les paramètres de la méthode si disponibles
+        try:
+            params = Parameters.objects.get(method=method).values
+            method_info["parameters"] = params
+        except Parameters.DoesNotExist:
+            method_info["parameters"] = {}
+            
+        experiment_data["methods"].append(method_info)
+    
+    # Ajouter les résultats
+    for result in results:
+        experiment_data["results"].append({
+            "method": result.method.name,
+            "values": result.values  # Déjà un JSONField
+        })
 
-    return render(request, "webapp/result.html", {"experiment": experiment, "results": results})
+    # Rendre le template avec les données
+    return render(request, "webapp/result.html", {
+        "experiment_data_json": json.dumps(experiment_data)
+    })
 
 # Requete de classification
 @csrf_exempt
