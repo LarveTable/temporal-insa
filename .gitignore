@@ -2,3 +2,5 @@
 UCRArchive_2018
 __pycache__
 UCR_TS_Archive_2015
+.vscode
+.pytest_cache
