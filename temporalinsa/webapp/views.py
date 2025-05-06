@@ -85,14 +85,18 @@ def result(request, experiment_id):
 @csrf_exempt
 def classifyRequest(request):
     if request.method == 'POST':
-        #try:
+        try:
             data = json.loads(request.body)
 
             experiment_id = experimentRequestClassify(data)
 
             return JsonResponse({"status": "success", "experiment_id": experiment_id}, status=201)
 
-        #except Exception as e:
-         #   return JsonResponse({"status": "error", "error": str(e)}, status=400)
+        except Exception as e:
+            return JsonResponse({"status": "error", "error": str(e)}, status=400)
 
     return JsonResponse({"status": "error", "error": "Invalid request"}, status=400)
+
+# Page locale de visualisation des résultats
+def result_local(request):
+    return render(request, "webapp/result_local.html")

@@ -6,31 +6,37 @@
     <title>Temporal'INSA – Load Experiment</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
         }
         header {
             background-color: #007BFF;
             color: white;
             width: 100%;
-            padding: 20px 0;
+            padding: 40px 0;
             text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         nav {
             background-color: #0056b3;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         nav a {
             color: white;
             text-decoration: none;
             margin: 0 15px;
-            font-size: 18px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: opacity 0.2s;
         }
         nav a:hover {
-            text-decoration: underline;
+            opacity: 0.8;
         }
         main {
             max-width: 600px;
@@ -125,29 +131,35 @@
                 const file = fileInput.files[0];
                 
                 if (!file) {
-                    alert('Please select a file to upload');
+                    alert('Please select a file to upload.');
                     return;
                 }
 
-                const formData = new FormData();
-                formData.append('experiment_file', file);
-
-                fetch('/webapp/load_experiment/', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        window.location.href = `/result/${data.experiment_id}/`;
-                    } else {
-                        alert('Error: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Upload error:', error);
-                    alert('An error occurred during file upload');
-                });
+                // Vérifier si c'est un fichier JSON
+                if (file.name.endsWith('.json')) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        try {
+                            // Analyser le contenu JSON
+                            const experimentData = JSON.parse(event.target.result);
+                            
+                            // Stocker les données dans localStorage
+                            localStorage.setItem('importedExperimentData', JSON.stringify(experimentData));
+                            
+                            // Rediriger vers la page de résultats locale
+                            window.location.href = "{% url 'webapp:result_local' %}";
+                        } catch (error) {
+                            console.error('Erreur lors de l\'analyse du fichier JSON:', error);
+                            alert('Le fichier JSON sélectionné n\'est pas valide');
+                        }
+                    };
+                    
+                    reader.readAsText(file);
+                } else {
+                    // Pour les autres types de fichiers, afficher un message d'erreur
+                    alert('Seuls les fichiers JSON sont pris en charge pour l\'importation directe');
+                }
             });
         });
     </script>

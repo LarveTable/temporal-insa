@@ -6,24 +6,29 @@
     <title>Classification Experiment</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
         }
         nav {
             background-color: #0056b3;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         nav a {
             color: white;
             text-decoration: none;
             margin: 0 15px;
-            font-size: 18px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: opacity 0.2s;
         }
         nav a:hover {
-            text-decoration: underline;
+            opacity: 0.8;
         }
         main {
             text-align: center;
@@ -513,21 +518,21 @@
             function getAlgorithmParameters(algorithm) {
                 const params = {};
                 if (algorithm === "Rocket") {
-                    params.num_iterations = document.getElementById("rocket-iterations").value;
                     params.num_kernels = document.getElementById("rocket-kernels").value;
                 } else if (algorithm === "MiniRocket") {
-                    params.num_iterations = document.getElementById("minirocket-iterations").value;
                     params.num_features = document.getElementById("minirocket-features").value;
+                    params.max_dilations = document.getElementById("minirocket-dilations").value;
                 } else if (algorithm === "L-Shapelets") {
                     params.num_iterations = document.getElementById("lshapelets-iterations").value;
                     params.min_length = document.getElementById("lshapelets-min-length").value;
                     params.max_length = document.getElementById("lshapelets-max-length").value;
                 } else if (algorithm === "Hydra") {
-                    params.num_iterations = document.getElementById("hydra-iterations").value;
-                    params.num_heads = document.getElementById("hydra-heads").value;
+                    params.k = document.getElementById("hydra-k").value;
+                    params.g = document.getElementById("hydra-g").value;
                 } else if (algorithm === "Boss") {
-                    params.num_iterations = document.getElementById("boss-iterations").value;
-                    params.window_sizes = document.getElementById("boss-windows").value;
+                    params.word_size = document.getElementById("boss-word-size").value;
+                    params.window_size = document.getElementById("boss-window").value;
+                    params.n_bins = document.getElementById("boss-bins").value;
                 }
                 return params;
             }
@@ -615,10 +620,6 @@
                     <h3>Rocket Parameters</h3>
                     <div class="param-group">
                         <div class="param-item">
-                            <label for="rocket-iterations">NUM ITERATIONS:</label>
-                            <input type="number" id="rocket-iterations" value="100" min="1">
-                        </div>
-                        <div class="param-item">
                             <label for="rocket-kernels">NUM KERNELS:</label>
                             <input type="number" id="rocket-kernels" value="10000" min="1">
                         </div>
@@ -628,8 +629,8 @@
                     <h3>MiniRocket Parameters</h3>
                     <div class="param-group">
                         <div class="param-item">
-                            <label for="minirocket-iterations">NUM ITERATIONS:</label>
-                            <input type="number" id="minirocket-iterations" value="100" min="1">
+                            <label for="minirocket-dilations">MAX DILATIONS PER KERNEL:</label>
+                            <input type="number" id="minirocket-dilations" value="32" min="1">
                         </div>
                         <div class="param-item">
                             <label for="minirocket-features">NUM FEATURES:</label>
@@ -658,12 +659,12 @@
                     <h3>Hydra Parameters</h3>
                     <div class="param-group">
                         <div class="param-item">
-                            <label for="hydra-iterations">NUM ITERATIONS:</label>
-                            <input type="number" id="hydra-iterations" value="100" min="1">
+                            <label for="hydra-k">K:</label>
+                            <input type="number" id="hydra-k" value="8" min="1">
                         </div>
                         <div class="param-item">
-                            <label for="hydra-heads">NUM HEADS:</label>
-                            <input type="number" id="hydra-heads" value="8" min="1">
+                            <label for="hydra-g">G:</label>
+                            <input type="number" id="hydra-g" value="64" min="1">
                         </div>
                     </div>
                 </div>
@@ -671,12 +672,16 @@
                     <h3>Boss Parameters</h3>
                     <div class="param-group">
                         <div class="param-item">
-                            <label for="boss-iterations">NUM ITERATIONS:</label>
-                            <input type="number" id="boss-iterations" value="100" min="1">
+                            <label for="boss-word-size">WORD SIZE:</label>
+                            <input type="number" id="boss-word-size" value="4" min="1">
                         </div>
                         <div class="param-item">
-                            <label for="boss-windows">WINDOW SIZES:</label>
-                            <input type="text" id="boss-windows" value="10,20,30,40">
+                            <label for="boss-window">WINDOW SIZE:</label>
+                            <input type="text" id="boss-window" value="10" min="1">
+                        </div>
+                        <div class="param-item">
+                            <label for="boss-bins">N BINS:</label>
+                            <input type="text" id="boss-bins" value="4" min="1">
                         </div>
                     </div>
                 </div>
@@ -718,7 +723,7 @@
                     <div class="param-group">
                         <div class="param-item">
                             <label for="ridge-alphas">ALPHAS:</label>
-                            <input type="text" id="ridge-alphas" value="0.1,1.0,10.0">
+                            <input type="text" id="ridge-alphas" value="-3,3,10">
                         </div>
                         <div class="param-item">
                             <label for="ridge-cv">CV:</label>

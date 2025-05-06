@@ -146,10 +146,6 @@
         </div>
     </div>
 
-    <script id="experiment-data" type="application/json">
-        {{ experiment_data_json|safe }}
-    </script>
-
     <script>
         // Placeholder function to populate the page with experiment data
         function populateResultPage(experimentData) {
@@ -271,19 +267,15 @@
             });
         }
 
-
-    // Récupérer les données d'expérience depuis le backend
-    const experimentData = JSON.parse(document.getElementById('experiment-data').textContent);
-
     // Fonction pour télécharger les données au format JSON
-    function downloadExperimentData() {
-        const dataStr = JSON.stringify(experimentData, null, 2);
+    function downloadExperimentData(data) {
+        const dataStr = JSON.stringify(data, null, 2);
         const dataBlob = new Blob([dataStr], {type: 'application/json'});
         const url = URL.createObjectURL(dataBlob);
         
         const downloadLink = document.createElement('a');
         downloadLink.href = url;
-        downloadLink.download = `${experimentData.name || 'experiment'}_${experimentData.id || Date.now()}.json`;
+        downloadLink.download = `${data.name || 'experiment'}_${data.id || Date.now()}.json`;
         
         document.body.appendChild(downloadLink);
         downloadLink.click();
@@ -293,11 +285,33 @@
 
     // Populate the page with data from the backend
     document.addEventListener('DOMContentLoaded', () => {
-        // Ajout de l'écouteur pour le bouton de sauvegarde
-        document.getElementById('save-button').addEventListener('click', downloadExperimentData);
-
-        // Appel de la fonction pour remplir la page avec les données d'expérience
-        populateResultPage(experimentData);
+        // Vérifier si des données importées sont disponibles dans localStorage
+        const importedData = localStorage.getItem('importedExperimentData');
+        
+        if (importedData) {
+            // Si oui, utiliser ces données et les supprimer du localStorage
+            try {
+                const experimentData = JSON.parse(importedData);
+                localStorage.removeItem('importedExperimentData'); // Nettoyage après utilisation
+                console.log("Données importées chargées avec succès");
+                populateResultPage(experimentData);
+                
+                // Configurer le bouton de sauvegarde avec les données importées
+                document.getElementById('save-button').addEventListener('click', function() {
+                    downloadExperimentData(experimentData);
+                });
+            } catch (error) {
+                console.error("Erreur lors du chargement des données importées:", error);
+                alert("Impossible de charger les données importées");
+                // Rediriger vers la page d'importation en cas d'erreur
+                window.location.href = '{% url "webapp:importation" %}';
+            }
+        } else {
+            // Si aucune donnée n'est disponible dans localStorage, 
+            // rediriger vers la page d'importation
+            alert("Aucune donnée d'expérience n'est disponible. Veuillez importer un fichier.");
+            window.location.href = "{% url 'webapp:importation' %}";
+        }
     });
     </script>
 </body>

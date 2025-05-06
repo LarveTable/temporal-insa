@@ -11,4 +11,5 @@ urlpatterns = [
     path("classifyRequest/", views.classifyRequest, name="classifyRequest"),
     path("documentation/", views.documentation, name="documentation"),
     path("importation/", views.importation, name="importation"),
+    path("result/local", views.result_local, name="result_local"),
 ]

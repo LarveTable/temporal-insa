@@ -19,7 +19,7 @@ class ClassifyExperiment:
         # classifier of the experiment
         self.classifier = experiment.classifier
         # parameters of the classifier
-        self.classifier_params = ClassifierParameters.objects.filter(experiment=self.id)
+        self.classifier_params = ClassifierParameters.objects.get(experiment=self.id)
 
     def run(self):
         # loop on datasets
@@ -32,20 +32,33 @@ class ClassifyExperiment:
                 # returning results of the classification (accuracy, f1-score, etc.)
                 match method.name:
                     case "Rocket":
-                        result = requestClassifyRocket(self.parameters[method.name].values, self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
+                        result = requestClassifyRocket(self.parameters[method.name].values, self.classifier, self.classifier_params.values, X_Train, X_Test, Y_Train, Y_Test)
                     case "MiniRocket":
-                        result = requestClassifyMiniRocket(self.parameters[method.name].values, self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
+                        result = requestClassifyMiniRocket(self.parameters[method.name].values, self.classifier, self.classifier_params.values, X_Train, X_Test, Y_Train, Y_Test)
                     case "Hydra":
-                        result = requestClassifyHydra(self.parameters[method.name].values, self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
+                        result = requestClassifyHydra(self.parameters[method.name].values, self.classifier, self.classifier_params.values, X_Train, X_Test, Y_Train, Y_Test)
                     case "Boss":
-                        result = requestClassifyBoss(self.parameters[method.name].values, self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
+                        result = requestClassifyBoss(self.parameters[method.name].values, self.classifier, self.classifier_params.values, X_Train, X_Test, Y_Train, Y_Test)
                     case "L-Shapelets":
-                        result = requestClassifyLShapelets(self.parameters[method.name].values, self.classifier, self.classifier_params, X_Train, X_Test, Y_Train, Y_Test)
+                        result = requestClassifyLShapelets(self.parameters[method.name].values, self.classifier, self.classifier_params.values, X_Train, X_Test, Y_Train, Y_Test)
                     case _:
                         raise ValueError("Invalid method")
                     
                 # save the results
                 exp = Experiment.objects.get(id=self.id)
                 method = Method.objects.get(id=method.id)
-                Result.objects.create(experiment=exp, method=method, values=result)
+
+                # check if the result already exists
+                if Result.objects.filter(experiment=exp, method=method).exists():
+                    # update the result
+                    result_obj = Result.objects.get(experiment=exp, method=method)
+                    dict = result_obj.values
+                    dict[dataset] = result
+                    result_obj.values = dict
+                    result_obj.save()
+                else:
+                    # create a new result
+                    dict = {}
+                    dict[dataset] = result
+                    Result.objects.create(experiment=exp, method=method, values=dict)
         return self.id

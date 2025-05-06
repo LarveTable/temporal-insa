@@ -11,6 +11,7 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.ensemble import BaggingClassifier
+import numpy as np
 
 def getClassifier(classifier, classifier_params):
     # return the classifier object
@@ -18,7 +19,8 @@ def getClassifier(classifier, classifier_params):
         case "SVC":
             return SVC()
         case "RidgeClassifierCV":
-            return RidgeClassifierCV()
+            alph = classifier_params["alphas"].split(",")
+            return RidgeClassifierCV(alphas=np.logspace(int(alph[0]), int(alph[1]), int(alph[2])))
         case "RandomForestClassifier":
             return RandomForestClassifier()
         case "LogisticRegression":
