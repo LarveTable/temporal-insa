@@ -47,7 +47,7 @@ https://github.com/user-attachments/assets/9036c29e-a814-4689-9c12-e91b314e5265
 ## Installation
 
 1. Récupérer l'archive UCR 2018 : https://www.cs.ucr.edu/%7Eeamonn/time_series_data_2018/
-2. Placer l'archive dans ./temporalinsa
+2. Placer l'archive dézipée (un mot de passe sera requis, voir instructions sur le site de l'UCR) dans ./temporalinsa
 3. Ouvrir un terminal à la racine du projet et lancer *poetry install --no-root*
 4. Lancer *poetry run temporalinsa/manage.py runserver* (le premier lancement peut prendre du temps)
 5. Ouvrir l'application web dans un navigateur : http://127.0.0.1:8000/webapp/
