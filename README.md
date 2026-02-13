@@ -41,6 +41,8 @@ Nous avons fait le choix d'une architecture unifiée pour faciliter la maintenan
 ## Aperçu
 
 
+https://github.com/user-attachments/assets/9036c29e-a814-4689-9c12-e91b314e5265
+
 
 ## Choix de conception
 
