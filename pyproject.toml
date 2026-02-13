@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "temporal-insa"
+version = "0.1.0"
+description = "Une plateforme web pour la classification et l'analyse de séries temporelles."
+authors = ["LarveTable <cyorick@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+numpy = "^1.26.4"
+numba = "^0.61.2"
+django = "^5.1.6"
+scikit-learn = "^1.6.1"
+torch = "^2.2.2"
+pyts = "^0.13.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
